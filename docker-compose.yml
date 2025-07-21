@@ -1,0 +1,146 @@
+services:
+  # MySQL Database for Strapi
+  mysql:
+    image: mysql:8.0
+    container_name: strapi_mysql
+    restart: unless-stopped
+    env_file:
+      - ./edu_strapi/.env
+    environment:
+      MYSQL_ROOT_PASSWORD: strapi_password
+      MYSQL_DATABASE: strapi
+      MYSQL_USER: strapiuser
+      MYSQL_PASSWORD: strapi_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./edu_strapi/init-scripts:/docker-entrypoint-initdb.d
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    networks:
+      - strapi_network
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DATABASE_USERNAME:-strapi}", "-p${DATABASE_PASSWORD:-strapi_password}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: strapi_redis
+    restart: unless-stopped
+    env_file:
+      - ./edu_strapi/.env
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - strapi_network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# Strapi CMS
+#  strapi:
+#    image: strapi/strapi:latest
+#    container_name: portal_biz_strapi
+#    restart: unless-stopped
+#    environment:
+#      DATABASE_CLIENT: mysql
+#      DATABASE_HOST: mysql
+#      DATABASE_PORT: 3306
+#      DATABASE_NAME: ${DATABASE_NAME:-portal_biz_strapi}
+#      DATABASE_USERNAME: ${DATABASE_USERNAME:-strapi}
+#      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-strapi_password}
+#      DATABASE_SSL: false
+#
+#      # JWT secrets
+#      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-change-this-in-production}
+#      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:-your-admin-jwt-secret-change-this-in-production}
+#      API_TOKEN_SALT: ${API_TOKEN_SALT:-your-api-token-salt-change-this-in-production}
+#
+#      # App settings
+#      APP_KEYS: ${APP_KEYS:-app-key-1,app-key-2,app-key-3,app-key-4}
+#      NODE_ENV: ${NODE_ENV:-development}
+#
+#      # Upload settings
+#      UPLOAD_PROVIDER: local
+#
+#      # Redis cache
+#      REDIS_HOST: redis
+#      REDIS_PORT: 6379
+#
+#      # Admin panel
+#      STRAPI_ADMIN_BACKEND_URL: ${STRAPI_ADMIN_BACKEND_URL:-http://localhost:1337}
+#      STRAPI_ADMIN_CLIENT_URL: ${STRAPI_ADMIN_CLIENT_URL:-http://localhost:3000}
+#      STRAPI_ADMIN_CLIENT_PREVIEW_SECRET: ${STRAPI_ADMIN_CLIENT_PREVIEW_SECRET:-preview-secret}
+#
+#    ports:
+#      - "${STRAPI_PORT:-1337}:1337"
+#    volumes:
+#      - strapi_data:/opt/app
+#      - ./edu_strapi/strapi-app:/opt/app
+#      - strapi_uploads:/opt/app/public/uploads
+#    networks:
+#      - strapi_network
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+#      redis:
+#        condition: service_healthy
+#    healthcheck:
+#      test: ["CMD", "curl", "-f", "http://localhost:1337/admin"]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
+
+  # phpMyAdmin for database management
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: strapi_phpmyadmin
+    restart: unless-stopped
+    env_file:
+      - ./edu_strapi/.env
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: strapi_password
+      MYSQL_ROOT_PASSWORD: strapi_password
+      PMA_ARBITRARY: 1
+    ports:
+      - "${PHPMYADMIN_PORT:-8080}:80"
+    networks:
+      - strapi_network
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # MailHog for email testing (optional)
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: strapi_mailhog
+    restart: unless-stopped
+    ports:
+      - "${MAILHOG_SMTP_PORT:-1025}:1025"
+      - "${MAILHOG_WEB_PORT:-8025}:8025"
+    networks:
+      - strapi_network
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  strapi_data:
+    driver: local
+  strapi_uploads:
+    driver: local
+
+networks:
+  strapi_network:
+    driver: bridge

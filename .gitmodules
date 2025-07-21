@@ -1,0 +1,6 @@
+[submodule "edu_nextjs"]
+	path = edu_nextjs
+	url = https://github.com/lyquangthai1993/edu_nextjs.git
+[submodule "edu_strapi"]
+	path = edu_strapi
+	url = https://github.com/lyquangthai1993/edu_strapi.git
