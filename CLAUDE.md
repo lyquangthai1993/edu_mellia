@@ -197,4 +197,6 @@ For specific implementation details, refer to the dedicated documentation files:
 4. **JWT Security**: Secure token storage and rotation
 5. **HTTPS**: Force HTTPS in production
 
-This project provides a solid foundation for building a modern, performant website with Next.js and Strapi, incorporating authentication, caching, and static generation for optimal user experience and SEO performance.
+## Strapi Configuration Memories
+
+- Use Strapi v5 format data
