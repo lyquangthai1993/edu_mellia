@@ -18,7 +18,7 @@ services:
       - "${MYSQL_PORT:-3306}:3306"
     networks:
       - strapi_network
-    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DATABASE_USERNAME:-strapi}", "-p${DATABASE_PASSWORD:-strapi_password}"]
       interval: 10s
@@ -50,26 +50,11 @@ services:
 #    image: strapi/strapi:latest
 #    container_name: portal_biz_strapi
 #    restart: unless-stopped
+#    env_file:
+#      - ./edu_strapi/.env
 #    environment:
-#      DATABASE_CLIENT: mysql
 #      DATABASE_HOST: mysql
 #      DATABASE_PORT: 3306
-#      DATABASE_NAME: ${DATABASE_NAME:-portal_biz_strapi}
-#      DATABASE_USERNAME: ${DATABASE_USERNAME:-strapi}
-#      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-strapi_password}
-#      DATABASE_SSL: false
-#
-#      # JWT secrets
-#      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-change-this-in-production}
-#      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:-your-admin-jwt-secret-change-this-in-production}
-#      API_TOKEN_SALT: ${API_TOKEN_SALT:-your-api-token-salt-change-this-in-production}
-#
-#      # App settings
-#      APP_KEYS: ${APP_KEYS:-app-key-1,app-key-2,app-key-3,app-key-4}
-#      NODE_ENV: ${NODE_ENV:-development}
-#
-#      # Upload settings
-#      UPLOAD_PROVIDER: local
 #
 #      # Redis cache
 #      REDIS_HOST: redis
