@@ -200,3 +200,4 @@ For specific implementation details, refer to the dedicated documentation files:
 ## Strapi Configuration Memories
 
 - Use Strapi v5 format data
+- Use typescript, please
